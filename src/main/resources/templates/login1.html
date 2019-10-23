@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <script th:src="@{js/vue.min.js}"></script>
+    <script th:src="@{js/vue-router-3.1.3.js}"></script>
+</head>
+<body>
+<div id="app">
+	<p>
+	<router-link to="/index">主页</router-link>
+    <router-link to="/news">新闻</router-link>
+    <router-link to="/friend">朋友圈</router-link>
+	</p>
+	<router-view></router-view>
+</div>
+<script type="text/javascript">
+Vue.component('newstpl',{
+	template:'<div><h2>新闻页</h2></div>',
+});
+Vue.component('firendlist',{
+	template:'<div><h2>朋友圈</h2></div>',
+});
+
+const indexhtml = { template: "<div><h3>主页内容</h3><p><router-link to='/index/zhuce'>注册</router-link> <router-link to='/index/login'>登录</router-link></router-link></p><router-view></router-view></div>" }
+const newhtml = { template: '<newstpl></newstpl>' }
+const firendhtml = { template: '<firendlist></firendlist>' }
+
+//const zhuce={template:'<div>我是注册</div>'}
+const zhuce= () => import('@tt')
+const login={template:'<div>我是登录</div>'}
+const routes = [
+	{ path: '/index', component: indexhtml,children:[{ path: 'zhuce', component: zhuce },{ path: 'login', component: login }] },
+	{ path: '/news', component: newhtml },
+	{ path: '/friend', component: firendhtml }
+	]
+	//3. 创建 router 实例，然后传 `routes` 配置
+	//你还可以传别的配置参数, 不过先这么简单着吧。
+	const router = new VueRouter({
+	routes // (缩写) 相当于 routes: routes
+	})
+	//4. 创建和挂载根实例。
+	//记得要通过 router 配置参数注入路由，
+	//从而让整个应用都有路由功能
+	const app = new Vue({
+	router
+	}).$mount('#app')
+
+</script>
+</body>
+</html>

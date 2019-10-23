@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+    <link th:href="@{../css/menu.css}" rel="stylesheet" />
+     <script th:src="@{../js/common.js}"></script>
+</head>
+<body>
+<div id="index_div" >
+<div class="def_float"  style="height:4em;line-height:4em;">
+	<div @click="addbtn(1)" class="button_add_def" th:if="${havepower.powerAdd=='1'}"><div><i></i></div>添加</div>
+	<div class="button_del_def" th:if="${havepower.powerDel=='1'}"><div><i></i></div>删除</div>
+</div>
+<div class="def_float">
+	<div style="position:absolute;height: calc(100% - 8em);max-width: calc(100% - 2em);width:90%">
+		<div style="position:relative;z-index:10;width:100%;display: inline-block;float:left;" >
+			<div class="table_title_def" style="width:10%">
+				<div class="checkbox_div" style="top:0.3em;">
+					<input class="checkbox_title checkbox_title_list" type="checkbox" @change="checkedAll($event)" />
+					<label></label>
+				</div>
+			</div>
+			<div class="table_title_def" style="width:20%">父菜单名称</div>
+			<div class="table_title_def" style="width:20%">菜单名称</div>
+			<div class="table_title_def" style="width:20%">菜单地址</div>
+			<div class="table_title_def t_w" style="width:10%">状态</div>
+			<div class="table_title_def t_w" style="width:20%">操作</div>
+		</div>
+		<div class="table_body">
+			<div class="table_tr_def" th:each="list : ${menulist}">
+				<div class="table_td_def"  style="width:10%">
+					<div class="checkbox_div">
+						<input class="checkbox checkbox_list" type="checkbox" @change="checked($event)"/>
+						<label></label>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:20%;" th:text=${menumap[list.superiorId]}></div>
+				<div class="table_td_def" style="left;width:20%;" th:text=${list.menuName}></div>
+				<div class="table_td_def" style="text-align:left;width:20%;" th:text=${list.menuLink}></div>
+				<div class="table_td_def t_w" style="width:10%" th:text=${stateMap[list.state]}></div>
+				<div class="table_td_def t_w" style="width:20%">权限设置</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<form id="addddd" action="#" method="post">
+<div class="backpanel" v-bind:class="{backpopupshow:isActive==1}"></div>
+<div class="menu_popupbody" v-bind:class="{backpopupshow:isActive==1}">
+	<div style="text-align:center;height:2em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;">新增菜单</div>
+	<div @click="addbtn(0)" class="popup_colse" >&times;</div>
+	<div class="popup_table">
+		<div class="popup_tr">
+			<div class="popup_td_left">上级菜单</div>
+			<div class="popup_td_right">
+				<select name="superiorId" class="popup_select">
+					<option value="0">顶级菜单</option>
+					<option th:each="list : ${menulist}" th:if="${list.superiorId=='0'}" th:value=${list.menuId} th:text=${list.menuName}></option>
+				</select>
+			</div>
+		</div>
+		<div class="popup_tr">
+			<div class="popup_td_left">菜单名称</div>
+			<div class="popup_td_right"><input name="menuName" type="text" class="popup_input" placeholder="菜单名称"/> </div>
+		</div>
+		<div class="popup_tr">
+			<div class="popup_td_left">菜单地址</div>
+			<div class="popup_td_right"><input name="menuLink" type="text" class="popup_input" placeholder="/menu"  /> </div>
+		</div>
+		<div class="popup_tr">
+			<div class="popup_td_left">父菜单排序</div>
+			<div class="popup_td_right"><input name="topsort" type="text" class="popup_input" placeholder="值越大排显示越靠前"  maxlength="5"/> </div>
+		</div>
+		<div class="popup_tr">
+			<div class="popup_td_left">菜单排序</div>
+			<div class="popup_td_right"><input name="sort" type="text" class="popup_input" placeholder="子菜单排序，值越大排显示越靠前"  maxlength="5"/> </div>
+		</div>
+		<div style="text-align:center;width:100%;float:left;">
+			<div @click="submit" class="button_def">确定</div>
+			<div @click="addbtn(0)" class="button_def">取消</div>
+		</div>
+	</div>
+</div>
+</form>
+
+
+<script th:inline="javascript">
+new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0
+		},
+	mounted:function(){
+	},
+	created:function(){
+		parent.document.getElementById('title_page').innerHTML=[[${pageTitle}]];
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		addbtn:function(parameter){
+			this.isActive=parameter;
+			if(parameter==0){
+				this.parentColor(0);
+				$(".menu_popupbody").css({top:"-70%"});
+			}else{
+				this.parentColor(1);
+				$(".menu_popupbody").css({top:"-70%"}).animate({ top:"6%" }, 300);
+			}
+			
+		},
+		submit:function(){
+			var _this = this;
+			$.post("/menu/addmenu",$("#addddd").serialize(),function(res){
+				console.log("222");
+				_this.isActive=0;
+			})
+		},
+		checkedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_list").prop("checked",true);
+			}else{
+				$(".checkbox_list").prop("checked",false);
+			}
+		},
+		checked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_title_list").prop("checked",false);
+			}
+		},
+		parentColor:function(parameter){
+			if(parameter==1){
+				parent.document.getElementById('topdiv').style.background='#e5e5e5';
+			}else{
+				parent.document.getElementById('topdiv').style.background='#fff';
+			}
+		}
+	}
+})
+</script>
+
+
+</div>
+</body>
+</html>

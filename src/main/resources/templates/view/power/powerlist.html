@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+</head>
+<body>
+<div id="index_div" >
+<div style="display:inline-block;font-size:1.5em;padding:10px 20px;">权限管理</div>
+<div style="position:absolute;left:2em;top:3em;">
+<div class="button_add_def">添加</div>
+<div class="button_del_def">删除</div>
+</div>
+
+<div style="position: absolute;left:2em;top:6em;width:19em;">
+	<div style="position:relative;z-index:10;" >
+		<div class="table_title_def t_w">全选</div>
+		<div class="table_title_def t_w">角色名称</div>
+		<div class="table_title_def t_w">状态</div>
+		<div class="table_title_def t_w">操作</div>
+	</div>
+	<div class="table_tr_def" th:each="list : ${rolelist}">
+		<div class="table_td_def t_w"><input type="checkbox"> </div>
+		<div class="table_td_def t_w" th:text=${list.roleName}></div>
+		<div class="table_td_def t_w" th:text=${list.state}></div>
+		<div class="table_td_def t_w" >权限设置</div>
+	</div>
+</div>
+
+
+</div>
+</body>
+</html>

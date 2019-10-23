@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.UserDao">
+    <!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+    
+    <!-- com.magicloud.controller.business.login:login() -->
+    <!-- 取得用户数据，登录验证 -->
+    <select id="getUser" parameterType="String" resultType="com.magicloud.entity.User">
+        select 
+        	s_user_id as userId,
+        	s_user_name as username,
+        	s_user_department as departmentId,
+			s_user as user,
+			s_password as pwd,
+			s_state as state,
+			s_level as level,
+			role_id as roleId,
+			s_errcount as errcount 
+			from user where s_user = #{user} and s_state &lt;&gt; 0
+    </select>
+    
+    <!-- com.magicloud.controller:userlist() -->
+    <!-- 管理员列表 -->
+	<select id="getUserList" parameterType="int" resultType="com.magicloud.entity.User">
+        select 
+        	u.s_user_id as userId,
+			u.s_user as user,
+			u.s_password as pwd,
+			u.s_state as state,
+			u.s_level as level,
+			u.role_id as roleId,
+			r.s_role_name as roleName,
+			u.s_errcount as errcount 
+			from user u,role r where u.s_level &lt;= #{level} and  u.s_state &lt;&gt; 0 and u.role_id=r.s_role_id
+    </select>
+    
+    <!-- com.magicloud.controller.business.login:adduser() -->
+    <!-- 新增管理员 -->
+    <insert id="addUser" parameterType="com.magicloud.entity.User">
+    	insert into user(
+    	s_user_id,
+    	s_user_department,
+    	s_user_name,
+    	s_user,
+    	s_password,
+    	s_state,
+    	s_level,
+    	role_id,
+    	s_errcount,
+    	createdate) values(#{userId},#{departmentId},#{username},#{user},#{pwd},#{state},#{level},#{roleId},#{errcount},now())
+    </insert>
+    <!-- com.magicloud.controller.business.login:login() -->
+    <!-- 密码错粗次数记录 -->
+    <update id="updUserForCount" parameterType="com.magicloud.entity.User">
+    	update user u set u.s_errcount=#{errcount},u.s_state=#{state} where u.s_user_id = #{userId}
+    </update>
+</mapper>

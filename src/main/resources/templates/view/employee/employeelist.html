@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+   	<link th:href="@{../css/index.css}" rel="stylesheet" />
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <script th:src="@{../js/common.js}"></script>
+    <script th:src="@{../js/My97DatePicker/WdatePicker.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+    <link th:href="@{../css/employee.css}" rel="stylesheet" />
+</head>
+<body>
+<div id="index_div">
+<form action="/employeelist" id="searchForm" method="get">
+	<div class="def_float" style="height:4em;">
+		<div class="search">
+			<span>名称<input name="employeeName" th:value="${employee.employeeName}" type="text"></span>
+		</div>
+		<div class="search">
+			<span>电话<input name="employeePhone" th:value="${employee.employeePhone}" type="text"></span>
+		</div>
+		<div class="search">
+			<span>部门 
+			<select name="departmentId">
+				<option></option>
+				<option th:each="dep : ${departmentMap}" th:value="${dep.key}" th:selected="${dep.key eq employee.departmentId}" th:text="${dep.value}"></option>
+			</select> 
+			</span>
+		</div>
+		<div class="search">
+			<span>职位
+				<select name="jobId">
+					<option></option>
+					<option th:each="job : ${jobMap}" th:value="${job.key}" th:selected="${job.key eq employee.jobId}" th:text="${job.value}"></option>
+				</select> 
+			</span>
+		</div>
+		<div class="search" @click="search()">
+		<div class="button_search_def"><div><i></i></div>查询</div>
+		</div>
+	</div>
+
+	<div class="def_float" style="height:4em;line-height:4em;">
+		<div @click="addbtn(1,1)" class="button_add_def" th:if="${havepower.powerAdd=='1'}"><div><i></i></div>添加</div>
+		<div @click="deltn(0)" class="button_del_def" th:if="${havepower.powerDel=='1'}"><div><i></i></div>删除</div>
+	</div>
+	
+	<div class="def_float">
+		<div style="position:absolute;height: calc(100% - 8em);max-width: calc(100% - 2em);width:90%">
+			<div style="position:relative;z-index:10;float:left;width:100%;">
+				<div class="table_title_def t_w">
+					<div class="checkbox_div" style="top:0.3em;">
+						<input class="checkbox_title checkbox_title_list" type="checkbox" @change="checkedAll($event)" />
+						<label></label>
+					</div>
+				</div>
+				<div class="table_title_def t_w" style="width:15%" >员工名称</div>
+				<div class="table_title_def t_w">性别</div>
+				<div class="table_title_def t_w">联系电话</div>
+				<div class="table_title_def t_w">所在部门</div>
+				<div class="table_title_def t_w">状态</div>
+				<div class="table_title_def t_w">职位</div>
+				<div class="table_title_def t_w" style="width:15%">身份证号码</div>
+				<div class="table_title_def t_w">操作</div>
+			</div>
+			<div class="table_body">
+				<div class="table_tr_def" th:each="list : ${employeelist}">
+					<div class="table_td_def t_w">
+						<div class="checkbox_div">
+							<input class="checkbox checkbox_list" type="checkbox" @change="checked($event)"/>
+							<label></label>
+						</div>
+					</div>
+					<div class="table_td_def t_w" style="width:15%" th:text=${list.employeeName}></div>
+					<div class="table_td_def t_w" th:text=${list.employeeSex=='1'?'男':'女'}></div>
+					<div class="table_td_def t_w" th:text=${list.employeePhone==''?'&nbsp;':list.employeePhone}></div>
+					<div class="table_td_def t_w" th:text=${departmentMap[list.departmentId]}></div>
+					<div class="table_td_def t_w" th:text=${employeeStateMap[list.stateId]}></div>
+					<div class="table_td_def t_w" th:text=${jobMap[list.jobId]}></div>
+					<div class="table_td_def t_w" style="width:15%" th:text=${list.employeeIDNo}></div>
+					<div class="table_td_def t_w" >
+						<span class="custom_a"  th:onclick="getinfo(1,[[${list.employeeId}]],0)" >查看</span>
+						<span class="custom_a"  th:onclick="getinfo(1,[[${list.employeeId}]],1)" >编辑</span>
+					</div>
+				</div>
+			</div>
+			<div style="float:left;height:3em;width:100%;">  <!--  th:if="${page.pageTotal>1}" -->
+				<div th:replace="view/paging :: paging"></div>
+			</div>
+		</div>
+	</div>
+</form>
+	<form action="" id="employeeform">
+	
+	
+	<div class="backpanel" v-bind:class="{backpopupshow:isActive==1}"></div>
+	<div class="employee_popup_table" v-bind:class="{backpopupshow:isActive==1}">
+		<!-- 机构编号 -->
+		<input type="hidden" name="orgId">
+		<!-- UUID -->
+		<input type="hidden" name="employeeId" v-model="reslist.employeeId" >
+		<div style="text-align:center;height:2em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;">员工信息</div>
+		<div @click="addbtn(0,0)" class="popup_colse">&times;</div>
+		<div class="emp_img">
+			<div class="emp_img_def">
+				<img id="emp_img" alt="" v-bind:src="reslist.employeeface" style="width:100%;height:10em;" />
+			</div>
+			<div class="emp_img_btm">
+				<input type="file" name="facefile" id="facefile" @change="upload()" accept="image/jpeg,image/png" v-if="submitbtn==1">
+				<input type="hidden" name="employeeface" id="employeeface" v-model="reslist.employeeface">
+				<div>上传识别验证图片</div>
+			</div>
+		</div>
+		<div class="employee_popup_tr">
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">姓名</div>
+				<div class="employee_popup_input"><input name="employeeName" id="emp_name"  v-model="reslist.employeeName" placeholder="姓名"/> </div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">身份证</div>
+				<div class="employee_popup_input"><input name="employeeIDNo" id="ID_NO"  v-model="reslist.employeeIDNo" placeholder="身份证号码"/> </div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">性别</div>
+				<div class=employee_popup_input>
+					<select name="employeeSex" id="emp_sex">
+						<option value="1">男</option>
+						<option value="0">女</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="employee_popup_tr">
+			
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">生日</div>
+				<div class="employee_popup_input"><input name="employeeBirthday" readonly="readonly" id="emp_birthday" onClick="WdatePicker({dateFmt:'yyyy/MM/dd'})" placeholder="生日" /> </div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">联系电话</div>
+				<div class="employee_popup_input"><input name="employeePhone" id="emp_phone" v-model="reslist.employeePhone" placeholder="联系电话"/> </div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label" >入职日期</div>
+				<div class="employee_popup_input"><input name="employeeEntryDate" readonly="readonly" id="emp_entrydate" onClick="WdatePicker({dateFmt:'yyyy/MM/dd'})" placeholder="入职日期" /> </div>
+			</div>
+		</div>
+		<div class="employee_popup_tr">
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">部门</div>
+				<div class="employee_popup_input">
+					<select name="departmentId" id="emp_dep">
+						<option th:each="list : ${departmentlist}" th:value=${list.departmentId} th:text=${list.departmentName} ></option>
+						<option value=""></option>
+					</select>
+				</div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">紧急联系人</div>
+				<div class="employee_popup_input">
+					<input name="employeeEmergencyName" id="emp_eme_name" v-model="reslist.employeeEmergencyName" placeholder="紧急联系人"/>
+				</div>
+			</div>
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">紧急联系电话</div>
+				<div class="employee_popup_input"><input name="employeeEmergencyPhone" id="emp_eme_phone" v-model="reslist.employeeEmergencyPhone" placeholder="紧急联系人电话"/> </div>
+			</div>
+		</div>
+		<div class="employee_popup_tr">
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">职位</div>
+				<div class="employee_popup_input">
+					<select name="jobId" id="emp_job">
+						<option th:each="list : ${joblist}" th:value=${list.jobId} th:text=${list.jobName} ></option>
+						<option value=""></option>
+					</select>
+				</div>
+			</div>
+			<div class="employee_popup_td" style="width:calc(54% + 0.5em);">
+				<div class="employee_popup_label" style="width:20%;">现居住地</div>
+				<div class="employee_popup_input" style="width:calc(80% - 1em);"><input name="employeeNowAddress" id="emp_address" v-model="reslist.employeeNowAddress" placeholder="现居住地"/> </div>
+			</div>
+		</div>
+		<div class="employee_popup_tr">
+			<div class="employee_popup_td">
+				<div class="employee_popup_label">离职日期</div>
+				<div class="employee_popup_input">
+					<input name="employeeDepartureDate" id="emp_leave" v-model="reslist.employeeDepartureDate" placeholder="离职日期" disabled="disabled"/>
+				</div>
+			</div>
+			<div class="employee_popup_td" style="width:calc(54% + 0.5em);">
+				<div class="employee_popup_label" style="width:20%;">户籍所在地</div>
+				<div class="employee_popup_input"  style="width:calc(80% - 1em);"><input name="employeeIDAddress" id="emp_id_address" v-model="reslist.employeeIDAddress" placeholder="户籍所在地"/> </div>
+			</div>
+		</div>
+		<div style="position:relative;top:6em;text-align:center;width:100%;float:left;">
+		<div @click="submit" v-if="empstate!=99" v-bind:class="{sub_show:submitbtn==1}" class="button_def" style="display:none;">确定</div>
+		<div @click="addbtn(0,0)" class="button_def">关闭</div>
+		<div @click="leavebtn(0,0)" v-if="empstate!=99" v-bind:class="{sub_show:flag==1}" class="button_e75556">离职</div>
+		</div>
+		<div v-bind:class="{sub_show:empstate==99}"  class="seal_panel"></div>
+		<div v-bind:class="{sub_show:empstate==99}" class="seal">已离职</div>
+	</div>
+	
+	</form>
+</div>
+
+<script th:inline="javascript">
+
+var vm = new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0,
+		reslist:{},
+		submitbtn:1,
+		empid:0,
+		empstate:'0',
+		// flag = 0：新增，1：更新
+		flag:0
+		},
+	created:function(){
+		parent.document.getElementById('title_page').innerHTML=[[${pageTitle}]];
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		addbtn:function(parameter1,parameter2){
+			this.isActive = parameter1;
+			this.submitbtn = parameter2;
+			this.empstate = '0';
+			this.flag = 0;
+			if(parameter1==0){
+				$(".employee_popup_table").css({top:"-100%"});
+				this.reslist={};
+				this.parentColor(0);
+			}else{
+				$(".employee_popup_table").css({top:"-100%"}).animate({ top: "6%" }, 300);
+				this.parentColor(1);
+			}
+		},
+		search:function(){
+			parent.document.getElementById('LoadDiv').style.display='block';
+			$("#searchForm").submit();
+		},
+		parentColor:function(parameter){
+			if(parameter==1){
+				parent.document.getElementById('topdiv').style.background='#e5e5e5';
+			}else{
+				parent.document.getElementById('topdiv').style.background='#fff';
+			}
+		},
+		checkedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_list").prop("checked",true);
+			}else{
+				$(".checkbox_list").prop("checked",false);
+			}
+		},
+		checked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_title_list").prop("checked",false);
+			}
+		},
+		submit:function(){
+			var _this = this;
+			if(_this.flag==0){
+				$.post("/employee/addemployee",$("#employeeform").serialize(),function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						_this.parentColor(0);
+						parent.document.getElementById('LoadDiv').style.display='block';
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}else{
+				$.post("/employee/editemployee",$("#employeeform").serialize(),function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						_this.parentColor(0);
+						parent.document.getElementById('LoadDiv').style.display='block';
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}
+			$(".employee_popup_table").css({top:"-33em"});
+		},
+		upload:function(){
+			var file = $("#facefile")[0].files[0];
+			var src = window.URL.createObjectURL(file);
+			$("#emp_img").attr("src",src);
+			
+			
+			/* if(file==undefined)return;
+			var formdata = new FormData();
+			formdata.append('facefile', file);
+			$.ajax({
+		        url:"/employee/uploadFace",
+		        type:'post',
+		        data: formdata,
+		        processData: false, //formdata已将数据序列化，无需在处理
+	            contentType: false, //formdata无需设置请求头
+		        success:function(res){
+		        	var data = JSON.parse(res)
+		        	if(data.status=="200"){
+		        		$("#emp_img").attr("src",data.message);
+			        	$("#employeeface").val(data.message);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+		        }
+		    }) */
+		},
+		leavebtn:function(){
+			var _this = this;
+			if(confirm("您正在执行离职操作，离职后将无法恢复，确定执行吗？")){
+				$.post("/employee/quitemployee",{employeeId:this.empid},function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}
+		}
+	}
+})
+
+function getinfo(parameter1,parameter2,parameter3){
+	vm.isActive = parameter1;
+	vm.submitbtn = parameter3;
+	vm.empid = parameter2;// 员工id
+	// parameter3 = 0：查看，1：编辑
+	if(parameter3==1)
+	vm.flag=1;
+	$.get("/employee/getinfo",{employeeID:parameter2},function(res){
+		var data = JSON.parse(res)
+		if(data.status=='200'){
+			data.entity.employeeBirthday=new Date(data.entity.employeeBirthday).Format("yyyy/MM/dd");
+			data.entity.employeeEntryDate=new Date(data.entity.employeeEntryDate).Format("yyyy/MM/dd");
+			vm.reslist=data.entity;
+			$("#emp_dep").val(data.entity.departmentId);
+			$("#emp_job").val(data.entity.jobId);
+			$("#emp_sex").val(data.entity.employeeSex);
+			$("#emp_birthday").val(data.entity.employeeBirthday);
+			$("#emp_entrydate").val(data.entity.employeeEntryDate);
+			//data.entity.employeeface = data.entity.employeeface==''?'/image/ico/user.png':data.entity.employeeface;
+			vm.empstate = data.entity.stateId;
+			vm.parentColor(1);
+			$(".employee_popup_table").css({top:"-100%"}).animate({ top: "6%" }, 300);
+		}else{
+			showmessage("["+data.status+"]："+data.message,"message_error");
+		}
+	})
+}
+Date.prototype.Format = function(fmt)   
+{ //author: meizz   
+  var o = {   
+    "M+" : this.getMonth()+1,                 //月份   
+    "d+" : this.getDate(),                    //日   
+    "h+" : this.getHours(),                   //小时   
+    "m+" : this.getMinutes(),                 //分   
+    "s+" : this.getSeconds(),                 //秒   
+    "q+" : Math.floor((this.getMonth()+3)/3), //季度   
+    "S"  : this.getMilliseconds()             //毫秒   
+  };   
+  if(/(y+)/.test(fmt))   
+    fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+  for(var k in o)   
+    if(new RegExp("("+ k +")").test(fmt))   
+  fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));   
+  return fmt;   
+}
+</script>
+
+
+</body>
+
+</html>

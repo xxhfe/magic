@@ -1,0 +1,9 @@
+@media screen and (max-height: 700px){
+	.menu_popupbody{background:#fff;width:40%;height:70%;position:absolute;z-index:100001;left:50%;box-shadow:0 0px 20px 0px #888;display:none;margin-left:-20%;}
+}
+@media (min-height: 701px) and (max-height:800px){
+	.menu_popupbody{background:#fff;width:40%;height:60%;position:absolute;z-index:100001;left:50%;box-shadow:0 0px 20px 0px #888;display:none;margin-left:-20%;}
+}
+@media screen and (min-height: 801px){
+	.menu_popupbody{background:#fff;width:40%;height:50%;position:absolute;z-index:100001;left:50%;box-shadow:0 0px 20px 0px #888;display:none;margin-left:-20%;}
+}

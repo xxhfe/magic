@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.JobDao">
+    <!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+    
+    <!-- JobController:joblist() -->
+    <!-- EmployeeController:employeelist() -->
+    <!-- 获取职位列表 -->
+    <select id="getJobList" parameterType="String" resultType="com.magicloud.entity.Job">
+        select 
+	        s_job_id as jobId,
+	        s_job_name as jobName,
+	        s_state as state
+        from job ${parameter}
+    </select>
+    
+    <!-- JobBusinessController:addjob() -->
+    <insert id="addJob" parameterType="com.magicloud.entity.Job">
+    	insert into job(s_job_id,s_job_name,s_state)values(#{jobId},#{jobName},#{state})
+    </insert>
+    <select id="getJob" parameterType="String" resultType="com.magicloud.entity.Job">
+        select 
+	        s_job_id as jobId,
+	        s_job_name as jobName,
+	        s_state as state
+        from job ${parameter}
+    </select>
+    <update id="updateJob" parameterType="com.magicloud.entity.Job">
+    	update job set 
+   		<if test="jobName!=null">
+   			s_job_name=#{jobName}
+   		</if>
+   		<if test="state!=null">
+   			s_state = #{state}
+   		</if>
+    	where s_job_id = #{jobId}
+    </update>
+</mapper>

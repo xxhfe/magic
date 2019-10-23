@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>魔点科技</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+   	<link th:href="@{../css/index.css}" rel="stylesheet" />
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+</head>
+<body>
+<div id="index_div">
+	<div th:replace="view/loading :: load"></div>
+	<div id="topdiv" class="index_top_body">
+		<!-- <div style="font-size:1.5em;color:#fff;padding-left:2em;padding-top:0.5em;display:none;">魔云智能</div> -->
+		<div style="position: absolute;left: 14.1em;height: 3em;width: 20em;">
+			<div id="title_page" style="font-size:1.5em;line-height:2em;color:#458994;"></div>
+		</div>
+		<div class="user_con">
+			<div class="user_bac">
+				<span style="color:#458994;height:3em;display:inline-block;line-height:3em;float:left;" >[[${username}]]</span><i class="user_in">-</i>
+				<span style="color:#458994;height:3em;display:inline-block;line-height:3em;float:left;" >[[${rolename}]]</span>
+				<i @click="exit(1)" class="exit"></i>
+				<i class="user_ico"></i>
+			</div>
+		</div>
+	</div>
+	<div class="index_meun_body">
+		<!-- 路径:名称 -->
+	<div th:replace="view/menu :: menu"></div>
+	</div>
+	<div class="index_content_body">
+		<div style="position:absolute; width:100%;height:100%;background:#e0e4ef;">
+			<iframe id="ifram" name="myiframe" style="border:0;margin:0;padding:0;width:100%;height:100%;background:#fff;position: absolute;top:0;left:0;min-height:40em;"></iframe>
+		</div>
+	</div>
+	<div id="LoadDiv" class="loding">
+		<img src="/image/loading.gif"><p>加载中</p>
+	</div>
+		
+	<div class="laert_panel" v-bind:class="{popupbody_show:showalert==1}"></div>
+	<div class="alert_menssage" v-bind:class="{popupbody_show:showalert==1}">
+		<div style="line-height:1.5em;background:#5c6a92;padding-left:1em;color:#fff;">提示</div>
+		<div style="text-align:center;"><p style="padding: 1em 1em;">是否要退出？</p></div>
+		<div style="text-align:center;">
+			<div @click="exit(2)" style="padding:0.5em 1em;background:#5c6a92;display: inline-block;color:#fff;margin:0 0.5em;">确定</div>
+			<div @click="exit(0)" style="padding:0.5em 1em;background:#5c6a92;display: inline-block;color:#fff;margin:0 0.5em;">取消</div>
+		</div>
+	</div>
+	
+</div>
+
+</body>
+<script th:inline="javascript" >
+var indexVM = new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0,
+		showload:true,
+		showalert:0
+		},
+	mounted:function(){
+		this.showload=false;
+	},
+	created:function(){
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		exit:function(parameter){
+			this.showalert = parameter;
+				if (parameter == 2) {
+					sessionStorage.removeItem([[${userid}]]);
+					var date = new Date();
+					date.setTime(date.getTime() - 10000);
+					document.cookie = [[${userid}]] + "=v;expires=" + date.toGMTString();
+					top.location.href="/login";
+				}
+			},
+			showmessage:function(text,type){
+				$(".message_popup").text(text);
+				$(".message_popup").addClass(type);
+				$(".message_popup").css({top:"-10em"}).animate({top: "1em" }, 300);
+				setTimeout(function(){
+					$(".message_popup").removeClass(type);
+				},3000);
+			},
+			mouseCurrent : function(parameter) {
+				this.isActive = parameter;
+			},
+			clickback : function(obj) {
+				//this.showload = true;
+				document.getElementById('topdiv').style.background='#fff';
+				$(".loding").show();
+				
+				///var ifr = $("#ifram");
+				//var loa = $("#load");
+				//var a = document.getElementById("aa");
+				//var b = document.getElementById("bb");
+				//ifr.onreadystatechange = function() { 
+					//console.log("加载中");
+					//if (ifr.readyState=="complete") { //最近才知道的。不然也写不出来。
+						// 解释：一个iframe加载完毕的状态是complete,
+						// 就象xmlhttp里的那个==4一样,这些都是规定的
+					//	console.log("完成");
+						//loa.hide();
+						//}
+				//}
+				$(".click_background").removeClass("click_background");
+				$(obj.currentTarget).addClass("click_background");
+				//console.log($(obj).text())
+				//$(obj).addClass("click_background");
+			}/*,
+					test:function(event){
+						
+					   e.target 是你当前点击的元素
+						 e.currentTarget 是你绑定事件的元素
+						    #获得点击元素的前一个元素
+						    e.currentTarget.previousElementSibling.innerHTML
+						    #获得点击元素的第一个子元素
+						    e.currentTarget.firstElementChild
+						    # 获得点击元素的下一个元素
+						    e.currentTarget.nextElementSibling
+						    # 获得点击元素中id为string的元素
+						    e.currentTarget.getElementById("string")
+						    # 获得点击元素的string属性
+						    e.currentTarget.getAttributeNode('string')
+						    # 获得点击元素的父级元素
+						    e.currentTarget.parentElement
+						    # 获得点击元素的前一个元素的第一个子元素的HTML值
+						    e.currentTarget.previousElementSibling.firstElementChild.innerHTML 
+						    
+						if(event.target.className!='text_link'){
+							
+						}
+					}*/
+		}
+	});
+	$(".menu_li").click(function() {
+		var len = $(this).next().children().length;
+		var h = $(this).next().height();
+		for (var i = 0; i < $(".nodes").length; i++) {
+			if ($(".nodes").eq(i).height() > 0) {
+				var h1 = $(".nodes").eq(i).height();
+				$(".nodes").eq(i).css({
+					height : h1 + "px"
+				}).animate({
+					height : "0px"
+				}, 300);
+				break;
+			}
+		}
+		if (h > 0) { // 关闭
+			$(this).next().css({ height : h + "px" }).animate({ height : "0px" }, 300);
+		} else { // 打开
+			$(this).next().css({ height : "0px" }).animate({ height : 3 * len + "em" }, 300);
+		}
+	});
+</script>
+</html>

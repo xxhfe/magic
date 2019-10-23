@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>[[${pageTitle}]]</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+    <script th:src="@{../js/common.js}"></script>
+</head>
+<body>
+<div id="index_div" >
+<form action="/joblist" method="get">
+<div class="def_float" style="height:4em;line-height:4em;">
+	<div @click="addbtn(1)" class="button_add_def" th:if="${havepower.powerAdd=='1'}"><div><i></i></div>添加</div>
+	<div class="button_del_def" th:if="${havepower.powerDel=='1'}"><div><i></i></div>删除</div>
+</div>
+<div class="def_float">
+	<div style="position:absolute;height: calc(100% - 8em);max-width: calc(100% - 2em);width:90%">
+		<div style="position:relative;z-index:10;float:left;width:100%;">
+			<div class="table_title_def t_w" style="width:20%">
+				<div class="checkbox_div" style="top:0.3em;">
+					<input class="checkbox_title checkbox_title_list" type="checkbox" @change="checkedAll($event)" />
+					<label></label>
+				</div>
+			</div>
+			<div class="table_title_def t_w" style="width:25%">职位名称</div>
+			<div class="table_title_def t_w" style="width:20%">状态</div>
+			<div class="table_title_def t_w" style="width:35%">操作</div>
+		</div>
+		<div class="table_body">
+			<div class="table_tr_def" th:each="list : ${joblist}">
+				<div class="table_td_def t_w" style="width:20%">
+					<div class="checkbox_div">
+						<input class="checkbox checkbox_list" type="checkbox" @change="checked($event)"/>
+						<label></label>
+					</div>
+				</div>
+				<div class="table_td_def t_w" style="width:25%" th:text=${list.jobName}></div>
+				<div class="table_td_def t_w green" style="width:20%" th:if="${list.state=='1'}" th:text=${stateMap[list.state]}></div>
+				<div class="table_td_def t_w red" style="width:20%" th:if="${list.state=='2'}" th:text=${stateMap[list.state]}></div>
+				<div class="table_td_def t_w"  style="width:35%">
+					<span class="custom_a" th:onclick="emplist([[${list.jobId}]])">成员管理</span>
+					<span class="custom_a" th:onclick="editjob([[${list.jobId}]])">编辑</span>
+					<span class="custom_a" th:onclick="deljob([[${list.jobId}]])">删除</span>
+				</div>
+			</div>
+			<input type="hidden" id="job_id" value=""/>
+		</div>
+		<div style="float:left;height:3em;width:100%;">
+			<div th:replace="view/paging :: paging"></div>
+		</div>
+	</div>
+</div>
+
+</form>
+
+
+<div class="message_popup"></div>
+
+<div class="backpanel" v-bind:class="{backpopupshow:isActive==2}"></div>
+<div class="popupbody" style="height:36em;top:3em;width:60em;margin-left:-30em;" v-bind:class="{popupbody_show:isActive==2}">
+	<div style="text-align:center;height:2em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;">成员列表</div>
+	<div @click="addbtn(0)" class="popup_colse">&times;</div>
+	<div style="width:50em;height: 25em;margin: 0px auto;top:3em;position: relative;">
+		<div class="def_float" style="height:4em;line-height:4em;margin:0;">
+			<div @click="addbtn(1)" class="button_add_def" th:if="${havepower.powerAdd=='1'}"><div><i></i></div>添加</div>
+			<div class="button_del_def" th:if="${havepower.powerDel=='1'}"><div><i></i></div>删除</div>
+		</div>
+		<div style="position:relative;z-index:10;" >
+			<div class="table_title_def" style="width:3em;">
+				<div class="checkbox_div" style="top:0.3em;">
+					<input class="checkbox_title checkbox_popup_title_list" type="checkbox" @change="popupcheckedAll($event)" />
+					<label></label>
+				</div>
+			</div>
+			<div class="table_title_def t_w" style="width:8em;">姓名</div>
+			<div class="table_title_def t_w">性别</div>
+			<div class="table_title_def t_w" style="width:7em">部门</div>
+			<div class="table_title_def t_w" style="width:7em;">电话</div>
+			<div class="table_title_def t_w">状态</div>
+			<div class="table_title_def t_w">操作</div>
+			
+		</div>
+		<div style="float:left;max-height:28em;width:50em;overflow:auto;">
+			<div class="table_tr_def" v-for="(item,index) in emplist">
+				<div class="table_td_def" style="width:3em;">
+					<div class="checkbox_div">
+						<input class="checkbox checkbox_popup_list" type="checkbox" @change="popupchecked($event)"/>
+						<label></label>
+					</div>
+				</div>
+				<div class="table_td_def t_w" style="width:8em;">{{item.employeeName}}</div>
+				<div class="table_td_def t_w">{{item.employeeSex=='1'?'男':'女'}}</div>
+				<div class="table_td_def t_w" style="width:7em">{{departmentMap[item.departmentId]}}</div>
+				<div class="table_td_def t_w" style="width:7em;">{{item.employeePhone}}</div>
+				<div class="table_td_def t_w">{{employeeStateMap[item.stateId]}}</div>
+				<div class="table_td_def t_w">
+					<span class="custom_a" >删除</span>
+				</div>
+			</div>
+		</div>
+		<div style="float:left;height:3em;width:100%;">
+			<div th:replace="view/paging :: paging"></div>
+		</div>
+	</div>
+</div>
+
+
+<form id="addjob" action="#" method="post">
+<div class="backpanel" v-bind:class="{backpopupshow:isActive==1}"></div>
+<div class="popupbody" v-bind:class="{popupbody_show:isActive==1}">
+	<div style="text-align:center;height:2em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;">新增职位</div>
+	<div @click="addbtn(0)" class="popup_colse">&times;</div>
+	<div class="popup_table">
+		<div class="popup_tr">
+			<div class="popup_td_left">角色名称</div>
+			<div class="popup_td_right"><input name="jobName" v-model="jobentity.jobName" class="popup_input"/></div>
+			<input name="jobId" type="hidden" v-model="jobentity.jobId"/>
+		</div>
+		<div style="text-align:center;width:100%;float:left;">
+			<div @click="submit()" class="button_def">确定</div>
+			<div @click="addbtn(0)" class="button_def">取消</div>
+		</div>
+	</div>
+	
+</div>
+</form>
+
+<script th:inline="javascript">
+var vm =new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0,
+		emplist:[],
+		jobentity:[],
+		departmentMap:[[${departmentMap}]],
+		employeeStateMap:[[${employeeStateMap}]],
+		flag:0
+	},
+	created:function(){
+		parent.document.getElementById('title_page').innerHTML=[[${pageTitle}]];
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		addbtn:function(parameter){
+			this.flag = 0;
+			this.isActive=parameter;
+			if(parameter==0){
+				this.parentColor(0);
+				this.jobentity = "";
+				$(".popupbody").css({top:"-40%"});
+			}else{
+				this.parentColor(1);
+				$(".popupbody").css({top:"-40%"}).animate({ top:"6%" }, 300);
+			}
+		},
+		checkedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_list").prop("checked",true);
+			}else{
+				$(".checkbox_list").prop("checked",false);
+			}
+		},
+		checked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_title_list").prop("checked",false);
+			}
+		},
+		popupcheckedAll:function(){
+			if(event.currentTarget.checked){
+				$(".checkbox_popup_list").prop("checked",true);
+			}else{
+				$(".checkbox_popup_list").prop("checked",false);
+			}
+		},
+		popupchecked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_popup_title_list").prop("checked",false);
+			}
+		},
+		submit:function(){
+			var url = "";
+			if(this.flag==0){
+				url = "/job/addjob";
+			}
+			if(this.flag==1){
+				url = "/job/editjob";
+			}
+			
+			var _this = this;
+			$.post(url,$("#addjob").serialize(),function(res){
+				var data = JSON.parse(res);
+				if(data.status=="200"){
+					parent.document.getElementById('LoadDiv').style.display='block';
+					parent.document.getElementById("ifram").contentWindow.location.reload(true);
+				}else{
+					showmessage("["+data.status+"]："+data.message,"message_error");
+				}
+			})
+		},
+		parentColor:function(parameter){
+			if(parameter==1){
+				parent.document.getElementById('topdiv').style.background='#e5e5e5';
+			}else{
+				parent.document.getElementById('topdiv').style.background='#fff';
+			}
+		}
+	}
+})
+function emplist(jobid){
+	$("#job_id").val(jobid);
+	window.open('/emplist?jobID='+jobid,'成员管理','width=1000px,height=600px,top=50,left=100,menubar=no,location=no,resizable=no,location=no,status=no');
+}
+function editjob(jobid){
+	$.get("/job/getjob",{"jobId":jobid},function(res){
+		var data = JSON.parse(res);
+		if(data.status=="200"){
+			vm.jobentity = data.entity;
+			vm.isActive = 1;
+			vm.flag = 1;
+			$(".popupbody").css({top:"-40%"}).animate({ top:"6%" }, 300);
+		}else{
+			showmessage("["+data.status+"]："+data.message,"message_error");
+		}
+	})
+}
+function deljob(jobid){
+	$.get("/job/isemp",{"jobId":jobid},function(res){
+		var data = JSON.parse(res);
+		if(data.status=="200"){
+			$.post("/job/deljob",{"jobId":jobid},function(res){
+				var data1 = JSON.parse(res);
+				if(data1.status=="200"){
+					parent.document.getElementById('LoadDiv').style.display='block';
+					parent.document.getElementById("ifram").contentWindow.location.reload(true);
+				}else{
+					showmessage("["+data1.status+"]："+data1.message,"message_error");
+				}
+			})
+		}else{
+			showmessage("["+data.status+"]："+data.message,"message_error");
+		}
+	})
+}
+
+</script>
+
+
+</div>
+</body>
+</html>

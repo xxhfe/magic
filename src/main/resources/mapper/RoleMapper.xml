@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.RoleDao">
+<!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+    
+    <!-- com.magicloud.interceptor：preHandle() -->
+    <!-- com.magicloud.controller.business.power：savepower() -->
+    <!-- 取得角色信息 -->
+    <select id="getRole" parameterType="String" resultType="com.magicloud.entity.Role">
+        select 
+        	s_role_id as roleId,
+			s_role_name as roleName,
+			s_state as state,
+			s_level as level 
+			from role where s_role_id = #{roleID} and s_state &lt;&gt; 0
+    </select>
+    
+    <!-- com.magicloud.controller:rolelist() -->
+    <!-- 角色列表 -->
+	<select id="getRoleList" parameterType="int" resultType="com.magicloud.entity.Role">
+        select 
+        	s_role_id as roleId,
+			s_role_name as roleName,
+			s_state as state,
+			s_level as level 
+			from role where s_level &lt;= #{level} and  s_state &lt;&gt; 0
+    </select>
+    <!-- com.magicloud.controller.business.role:addrole() -->
+    <!-- 新增角色 -->
+    <insert id="addRole" parameterType="com.magicloud.entity.Role">
+    	insert into role(s_role_id,s_role_name,s_state,s_level,createtime) values(#{roleId},#{roleName},#{state},#{level},now())
+    </insert>
+</mapper>

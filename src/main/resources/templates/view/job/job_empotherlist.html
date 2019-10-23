@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>成员管理</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+</head>
+<body οnbefοreunlοad="checkLeave()">
+<div id="index_div" >
+<form action="/emplist" method="get">
+	<div class="def_float" style="height:4em;line-height:4em;">
+		<div @click="addbtn(1,1)" class="button_add_def" >确定</div>
+	</div>
+	
+	<div class="def_float">
+		<div style="position:absolute;height: calc(100% - 8em);max-width: calc(100% - 2em);width:90%">
+			<div style="position:relative;z-index:10;width:100%;display: inline-block;float:left;" >
+				<div class="table_title_def t_w">
+					<div class="checkbox_div" style="top:0.3em;">
+						<input class="checkbox_title checkbox_title_list" type="checkbox" @change="checkedAll($event)" />
+						<label></label>
+					</div>
+				</div>
+				<div class="table_title_def t_w" style="width: 30%">员工名称</div>
+				<div class="table_title_def t_w">性别</div>
+				<div class="table_title_def t_w" style="width: 14%">联系电话</div>
+				<div class="table_title_def t_w" style="width: 13%">部门</div>
+				<div class="table_title_def t_w" style="width: 13%">职位</div>
+				<div class="table_title_def t_w">操作</div>
+			</div>
+			<div class="table_body">
+				<div class="table_tr_def" th:each="list : ${employeeList}">
+					<div class="table_td_def t_w">
+						<div class="checkbox_div">
+							<input class="checkbox checkbox_list" type="checkbox" @change="checked($event)"/>
+							<label></label>
+						</div>
+					</div>
+					<div class="table_td_def t_w" style="width: 30%" th:text=${list.employeeName}></div>
+					<div class="table_td_def t_w" th:text=${list.employeeSex=='1'?'男':'女'}></div>
+					<div class="table_td_def t_w" style="width: 14%" th:text=${list.employeePhone}></div>
+					<div class="table_td_def t_w" style="width: 13%" th:text=${departmentMap[list.departmentId]}></div>
+					<div class="table_td_def t_w" style="width: 13%" th:text=${jobMap[list.jobId]}></div>
+					<div class="table_td_def t_w">
+						<span class="custom_a"  th:onclick="getinfo(1,[[${list.employeeId}]],0)" >删除</span>
+					</div>
+				</div>
+				<input type="hidden" id="jobID" name="jobID" value="" />
+			</div>
+			<div style="float:left;height:3em;width:100%;">
+				<div th:replace="view/paging :: paging"></div>
+			</div>
+		</div>
+	</div>
+</form>	
+	
+	
+<script th:inline="javascript">
+var vm = new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0,
+		reslist:{},
+		submitbtn:1,
+		empid:0,
+		empstate:'0',
+		flag:0,        // flag = 0：新增，1：更新
+		},
+	created:function(){
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		addbtn:function(parameter1,parameter2){
+			window.open('https://www.baidu.com','new2','width=1000px,height=600px,top=50,left=100,menubar=no,location=no,resizable=no,location=no,status=no');
+		},
+		search:function(){
+			parent.document.getElementById('LoadDiv').style.display='block';
+			$("#searchForm").submit();
+		},
+		parentColor:function(parameter){
+			if(parameter==1){
+				parent.document.getElementById('topdiv').style.background='#e5e5e5';
+			}else{
+				parent.document.getElementById('topdiv').style.background='#fff';
+			}
+		},
+		checkedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_list").prop("checked",true);
+			}else{
+				$(".checkbox_list").prop("checked",false);
+			}
+		},
+		checked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_title_list").prop("checked",false);
+			}
+		},
+		submit:function(){
+			var _this = this;
+			if(_this.flag==0){
+				$.post("/employee/addemployee",$("#employeeform").serialize(),function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						_this.parentColor(0);
+						parent.document.getElementById('LoadDiv').style.display='block';
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}else{
+				$.post("/employee/editemployee",$("#employeeform").serialize(),function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						_this.parentColor(0);
+						parent.document.getElementById('LoadDiv').style.display='block';
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}
+			$(".employee_popup_table").css({top:"-33em"});
+		},
+		upload:function(){
+			var file = $("#facefile")[0].files[0];
+			if(file==undefined)return;
+			var formdata = new FormData();
+			formdata.append('facefile', file);
+			$.ajax({
+		        url:"/employee/uploadFace",
+		        type:'post',
+		        data: formdata,
+		        processData: false, //formdata已将数据序列化，无需在处理
+	            contentType: false, //formdata无需设置请求头
+		        success:function(res){
+		        	var data = JSON.parse(res)
+		        	if(data.status=="200"){
+		        		$("#emp_img").attr("src",data.message);
+			        	$("#employeeface").val(data.message);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+		        }
+		    })
+		},
+		leavebtn:function(){
+			var _this = this;
+			if(confirm("您正在执行离职操作，离职后将无法恢复，确定执行吗？")){
+				$.post("/employee/quitemployee",{employeeId:this.empid},function(res){
+					var data = JSON.parse(res);
+					if(data.status=="200"){
+						parent.document.getElementById("ifram").contentWindow.location.reload(true);
+					}else{
+						showmessage("["+data.status+"]："+data.message,"message_error");
+					}
+				})
+			}
+		}
+	}
+})
+
+$(function(){
+	var a = window.opener.document.getElementById("job_id").value;
+	$("#jobID").val(a);
+})
+	</script>
+	
+</div>
+</body>
+</html>

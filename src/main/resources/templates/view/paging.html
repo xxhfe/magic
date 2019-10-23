@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+	<div th:fragment="paging" class="paging">
+		<input type="hidden" id="currentPageNo" name="currentPageNo" th:value="${page.currentPageNo}">
+		<div th:onclick="paging(1,0)">首页</div>
+		<div th:onclick="paging([[${page.currentPageNo-1}]],1)">上一页</div>
+		<div th:onclick="paging([[${page.currentPageNo+1}]],1)">下一页</div>
+		<div th:onclick="paging([[${page.pageTotal}]],2)">末页</div>
+		<span th:text="${page.currentPageNo}+'/'+${page.pageTotal}"></span> <span>显示</span>
+		<i><input type="text" id="maxResults" name="maxResults"
+			th:value="${page.maxResults}"
+			onkeyup="value=value.replace(/[^\d]/g,'');" style="width: 25px;"></i>
+		<span>转到</span> <i><input type="text" id="currentPageNo"
+			th:value="${page.currentPageNo}"
+			onkeyup="value=value.replace(/[^\d]/g,'');" style="width: 25px;"></i>
+			
+		<script th:inline="javascript">
+			function paging(parameter,parameter2){
+				if(parameter2==0){
+					if(parameter==[[${page.currentPageNo}]]){
+						return;
+					}
+				}
+				if(parameter2==1){
+					if(parameter<1 || parameter > [[${page.pageTotal}]]){
+						return;
+					}
+				}
+				if(parameter2==2){
+					if([[${page.currentPageNo}]]==[[${page.pageTotal}]]){
+						return;
+					}
+				}
+				
+				if([[${page.url}]]!="\/emplist"){
+					parent.document.getElementById('LoadDiv').style.display='block';
+				}
+				document.forms[0].action=[[${page.url}]];
+				document.getElementById('currentPageNo').value=parameter;
+				document.forms[0].submit();
+			}
+		</script>
+	</div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+@charset "utf8";
+body{margin:0;padding:0;border:0;font-size:14px;}
+@media screen and (max-width: 1200px){ 
+.employee_popup_table{background:#fff;width:82%;height:50%;top:-100%;position:absolute;left:9%;z-index:100001;box-shadow:0 0px 20px 0px #888;min-height:30em;display:none;}
+}
+@media (min-width: 1201px) and (max-width:1500px){
+.employee_popup_table{background:#fff;width:70%;height:50%;top:-100%;position:absolute;left:15%;z-index:100001;box-shadow:0 0px 20px 0px #888;min-height:30em;display:none;}
+}
+@media (min-width: 1501px){
+.employee_popup_table{background:#fff;width:60%;height:50%;top:-100%;position:absolute;left:20%;z-index:100001;box-shadow:0 0px 20px 0px #888;min-height:30em;display:none;}
+}
+
+.employee_popup_tr{float:left;width:100%;position:relative;top:5em;height:3.5em;}
+.employee_popup_td{float:left;width:27%;}
+.employee_popup_label{float:left;width:40%;height:2.3em;line-height:2.3em;text-align:right;cursor: default;}
+.employee_popup_input{margin-left:0.5em;float:left;width:calc(60% - 0.5em);}
+.employee_popup_input input{width:calc(100% - 0.5em);height:2em;padding-left:0.5em;}
+.employee_popup_input select{width:calc(100% + 4px);height:calc(2em + 6px);padding-left:0.5em;}
+.emp_img{width:8em;height:12em;position:absolute;right:3em;top:5em;border:1px solid #ddd;z-index:10;display: inline-block;}
+.emp_img_def{background: url(../image/ico/employee.svg) no-repeat center;height:10em;width:100%;float:left;}
+.emp_img_btm{width:100%;height:2em;float:left;}
+.emp_img_btm >input{position:absolute;z-index:10;opacity:0;width:100%;height:2em;}
+.emp_img_btm >div{position:absolute;height:2em;width:100%;text-align:center;line-height:2em;background:#3e7bce;color:#fff;cursor:default;}
+.seal_panel{position:absolute;height:18em;width:100%;top:5em;left:0;opacity:0;z-index:100;display:none;}
+.seal {position: absolute;width: 8em;text-align: center;height: 2.5em;border: 2px solid #e75556;line-height: 2.5em;color: #e75556;font-weight: bold;top: 2em;left: 0.4em;font-size: 1.5em;-webkit-transform: rotate(-30deg);-moz-transform: rotate(-30deg);-o-transform: rotate(-30deg);transform: rotate(-30deg);display:none;}

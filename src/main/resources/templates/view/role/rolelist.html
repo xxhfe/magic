@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <script th:src="@{../js/vue.min.js}"></script>
+    <script th:src="@{../js/iview.min.js}"></script>
+    <script th:src="@{../js/jquery1.7.2.min.js}"></script>
+    <link th:href="@{../css/common.css}" rel="stylesheet" />
+    <link th:href="@{../css/role.css}" rel="stylesheet" />
+    <script th:src="@{../js/common.js}"></script>
+</head>
+<body>
+<div id="index_div" >
+<div class="def_float" style="height:4em;line-height:4em;">
+	<div @click="addbtn(1)" class="button_add_def" th:if="${havepower.powerAdd=='1'}"><div><i></i></div>添加</div>
+	<div class="button_del_def" th:if="${havepower.powerDel=='1'}"><div><i></i></div>删除</div>
+</div>
+
+<div class="def_float">
+	<div style="position:absolute;height: calc(100% - 8em);max-width: calc(100% - 2em);width:90%">
+		<div style="position:relative;z-index:10;width:100%;display: inline-block;float:left;">
+			<div class="table_title_def" style="width:15%">
+				<div class="checkbox_div" style="top:0.3em;">
+					<input class="checkbox_title checkbox_title_list" type="checkbox" @change="checkedAll($event)" />
+					<label></label>
+				</div>
+			</div>
+			<div class="table_title_def t_w" style="width:40%">角色名称</div>
+			<div class="table_title_def t_w" style="width:15%">状态</div>
+			<div class="table_title_def t_w" style="width:30%">操作</div>
+		</div>
+		<div class="table_body">
+			<div class="table_tr_def" th:each="list : ${rolelist}">
+				<div class="table_td_def" style="width:15%">
+					<div class="checkbox_div">
+						<input class="checkbox checkbox_list" type="checkbox" @change="checked($event)"/>
+						<label></label>
+					</div>
+				</div>
+				<div class="table_td_def t_w" style="width:40%" th:text=${list.roleName}></div>
+				<div class="table_td_def t_w green" style="width:15%" th:if="${list.state=='1'}" th:text=${stateMap[list.state]}></div>
+				<div class="table_td_def t_w red" style="width:15%" th:if="${list.state=='2'}" th:text=${stateMap[list.state]}></div>
+				<div class="table_td_def t_w" style="width:30%"><span class="custom_a" th:onclick="powerbtntest(2,[[${list.roleId}]])" >权限设置 </span></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="message_popup"></div>
+
+<form id="addddd" action="#" method="post">
+<div class="backpanel" v-bind:class="{backpopupshow:isActive==1}"></div>
+<div class="popupbody" v-bind:class="{popupbody_show:isActive==1}">
+	<div style="text-align:center;height:2em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;">新增角色</div>
+	<div @click="addbtn(0)" class="popup_colse">&times;</div>
+	<div class="popup_table">
+		<div class="popup_tr">
+			<div class="popup_td_left">角色名称</div>
+			<div class="popup_td_right"><input name="roleName" type="text" class="popup_input"/> </div>
+		</div>
+		<div style="text-align:center;width:100%;float:left;">
+			<div @click="submit" class="button_def">确定</div>
+			<div @click="addbtn(0)" class="button_def">取消</div>
+		</div>
+	</div>
+	
+</div>
+</form>
+
+<div class="backpanel" v-bind:class="{backpopupshow:isActive==2}"></div>
+<div class="role_power_body" v-bind:class="{backpopupshow:isActive==2}">
+	<div style="text-align:center;height:3em;line-height:3em;position:absolute;width:100%;font-size:1.3em;font-weight: bold;width:70%;left: 15%;">权限分配</div>
+	<div @click="powerbtn(0)" class="popup_colse">&times;</div>
+	<!-- <div style="width:44.8em;height:24em;position:absolute;left:3em;top:5em;text-align:center;"> -->
+	<div style="position:absolute;height: calc(100% - 8em);width:90%;top:4em;left:5%;">
+		<div style="position:relative;z-index:10;width:100%;display: inline-block;float:left;">
+			<div class="table_title_def" style="width:10%">
+				<div class="checkbox_div" style="top:0.3em;">
+					<input @change="powercheckedAll($event)" class="checkbox_title" type="checkbox">
+					<label></label>
+				</div>
+			</div>
+			<div class="table_title_def" style="width:25%">菜单名称</div>
+			<div class="table_title_def" style="width:13%">查询权限</div>
+			<div class="table_title_def" style="width:13%">新增权限</div>
+			<div class="table_title_def" style="width:13%">编辑权限</div>
+			<div class="table_title_def" style="width:13%">删除权限</div>
+			<div class="table_title_def" style="width:13%">文件操作权限</div>
+			
+			<!-- backgroun_title last_border_right -->
+		</div>
+		<!-- <div id="assignpower" class="assignpower" style="display: inline-block;float:left;height:18em;overflow:auto;"> -->
+		<div class="table_body">
+			<div class="table_tr_def" v-for="(item,index) in reslist">
+				<div class="table_td_def" style="width:10%;">
+					<div class="checkbox_div">
+					<input @change="powercheckedrow($event)" 
+						v-bind:id="item.menuId" v-bind:groupid="item.superNode" v-bind:powerid="item.powerId" 
+						v-bind:checked="(item.powerId!='0'&&item.state=='1')" class="checkbox i checkbox_popup_list" type="checkbox" />
+						<label></label>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:25%">{{item.menuName}}</div>
+				<div class="table_td_def" style="width:13%">
+					<div class="check_box">  <!-- 查询 -->
+						<div class="checkbox_div" v-if="item.superNode!='0'">
+							<input @change="powerchecked($event)" 
+							v-bind:groupid="item.superNode" v-bind:columnid="item.menuId" 
+							v-bind:id="'sel'+index"  v-bind:checked="item.powerSel=='1'" class="checkbox checkbox_popup_list"  type="checkbox" />
+							<label></label>
+						</div>
+						<span v-if="item.superNode=='0'">-</span>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:13%;">
+					<div class="check_box">  <!-- 新增 -->
+						<div class="checkbox_div" v-if="item.superNode!='0'">
+							<input @change="powerchecked($event)" 
+							v-bind:groupid="item.superNode" v-bind:columnid="item.menuId" 
+							v-bind:id="'add'+index"  v-bind:checked="item.powerAdd=='1'" class="checkbox checkbox_popup_list" type="checkbox"/>
+							<label></label>
+						</div>
+						<span v-if="item.superNode=='0'">-</span>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:13%;">
+					<div class="check_box">  <!-- 编辑 -->
+						<div class="checkbox_div" v-if="item.superNode!='0'">
+							<input @change="powerchecked($event)" 
+							v-bind:groupid="item.superNode" v-bind:columnid="item.menuId" 
+							v-bind:id="'upd'+index"  v-bind:checked="item.powerUpd=='1'" class="checkbox checkbox_popup_list" type="checkbox"/>
+							<label></label>
+						</div>
+						<span v-if="item.superNode=='0'">-</span>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:13%;">
+					<div class="check_box">  <!-- 删除 -->
+						<div class="checkbox_div" v-if="item.superNode!='0'">
+							<input @change="powerchecked($event)" 
+							v-bind:groupid="item.superNode" v-bind:columnid="item.menuId" 
+							v-bind:id="'del'+index"  v-bind:checked="item.powerDel=='1'" class="checkbox checkbox_popup_list" type="checkbox"/>
+							<label></label>
+						</div>
+						<span v-if="item.superNode=='0'">-</span>
+					</div>
+				</div>
+				<div class="table_td_def" style="width:13%;">
+					<div class="check_box">  <!-- 文件 -->
+						<div class="checkbox_div" v-if="item.superNode!='0'">
+							<input @change="powerchecked($event)" 
+							v-bind:groupid="item.superNode" v-bind:columnid="item.menuId" 
+							v-bind:id="'file'+index"  v-bind:checked="item.powerFile=='1'" class="checkbox checkbox_popup_list" type="checkbox"/>
+							<label></label>
+						</div>
+						<span v-if="item.superNode=='0'">-</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div style="position:relative;top:2em;text-align:center;width:100%;float:left;">
+			<div @click="submitbtn(0)" class="button_def">确定</div>
+			<div @click="powerbtn(0)" class="button_def">取消</div>
+		</div>
+	</div>
+</div>
+
+<script th:inline="javascript">
+var vm =new Vue({
+	el : '#index_div',
+	data : {
+		isActive:0,
+		reslist:[],
+		roleid:0
+	},
+	created:function(){
+		parent.document.getElementById('title_page').innerHTML=[[${pageTitle}]];
+		if(sessionStorage.getItem([[${userid}]])==null){
+			top.location.href="/login";
+		}
+	},
+	methods:{
+		addbtn:function(parameter){
+			this.isActive=parameter;
+			if(parameter==1){
+				this.parentColor(1);
+				$(".popupbody").css({top:"-100%"}).animate({ top: "6%" }, 300);
+			}else{
+				this.parentColor(0);
+				$(".popupbody").css({top:"-100%"});
+			}
+			
+		},
+		powerbtn:function(parameter){
+			this.isActive=parameter;
+			this.parentColor(0);
+			var _this = this;
+			if(parameter!=0){
+				/* $.get("/power/assignpower",function(res){
+					var data = JSON.parse(res)
+					console.log(data)
+					if(data.status=='1000'){
+						this.showmessage(data.message);
+					}else{
+						_this.reslist=data.list;
+						$(".role_power_body").css({top:"-33em"}).animate({ top: "3em" }, 300);
+					}
+				}) */
+			}else{
+				$(".role_power_body").css({top:"-100%"});
+				this.reslist=[];
+				this.showmessage("数据未保存","message_error");
+			}
+		},
+		submitbtn:function(parameter){
+			this.isActive=parameter;
+			this.parentColor(0);
+			var row_len = $(".i").length;
+			var cons = new Array();
+			for(var i=0;i<row_len;i++){
+				if($(".i").eq(i).attr("groupid")=='0'){
+					// groupid=0 父菜单
+					var con = {};
+					con["checked"]=$(".i").eq(i).is(':checked')?"1":"0";
+					con["menuId"]=$(".i").eq(i).attr("id");
+					con["powerId"]=$(".i").eq(i).attr("powerid");
+					con["powerAdd"]="0";
+					con["powerDel"]="0";
+					con["powerUpd"]="0";
+					con["powerSel"]="0";
+					con["powerFile"]="0";
+					con["roleId"]=this.roleid;
+					cons[i]=con;
+				}else{
+					// 子菜单
+					var con = {};
+					con["checked"]=$(".i").eq(i).is(':checked')?"1":"0";
+					con["menuId"]=$(".i").eq(i).attr("id");
+					con["powerId"]=$(".i").eq(i).attr("powerid");
+					con["powerAdd"]=$("#add"+i).is(':checked')?"1":"0";
+					con["powerDel"]=$("#del"+i).is(':checked')?"1":"0";
+					con["powerUpd"]=$("#upd"+i).is(':checked')?"1":"0";
+					con["powerSel"]=$("#sel"+i).is(':checked')?"1":"0";
+					con["powerFile"]=$("#file"+i).is(':checked')?"1":"0";
+					con["roleId"]=this.roleid;
+					cons[i]=con;
+				}
+			}
+			//console.log(JSON.stringify({data:cons}))
+			$.ajax({
+				url: "/power/savepower",
+			    type: "POST",
+			    data: JSON.stringify({data:cons}),
+			    dataType: "json",
+			    contentType: "application/json; charset=utf-8",
+			    success: function(res){
+			    	//var data = JSON.parse(res);
+			    	if(res.status=='err'){
+						vm.showmessage(res.message,"message_error");
+					}
+			    	if(res.status=='1000'){
+						vm.showmessage(res.message,"message_error");
+					}
+			    	if(res.status=='success'){
+						vm.showmessage(res.message,"message_success");
+					}
+			    	$(".role_power_body").css({top:"-33em"});
+					this.reslist=[];
+			    }
+			})
+		},
+		parentColor:function(parameter){
+			if(parameter==1){
+				parent.document.getElementById('topdiv').style.background='#e5e5e5';
+			}else{
+				parent.document.getElementById('topdiv').style.background='#fff';
+			}
+		},
+		showmessage:function(text,type){
+			$(".message_popup").text(text);
+			$(".message_popup").addClass(type);
+			$(".message_popup").css({top:"-10em"}).animate({top: "1em" }, 300);
+			setTimeout(function(){
+				$(".message_popup").removeClass(type);
+			},3000);
+		},
+		submit:function(){
+			var _this = this;
+			$.post("/role/addrole",$("#addddd").serialize(),function(res){
+				_this.isActive=0;
+			})
+		},
+		checkedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_list").prop("checked",true);
+			}else{
+				$(".checkbox_list").prop("checked",false);
+			}
+		},
+		checked:function(event){
+			if(!event.currentTarget.checked){
+				$(".checkbox_title_list").prop("checked",false);
+			}
+		},
+		// 全选
+		powercheckedAll:function(event){
+			if(event.currentTarget.checked){
+				$(".checkbox_popup_list").prop("checked",true);
+			}else{
+				$(".checkbox_popup_list").prop("checked",false);
+			}
+		},
+		// 组选
+		powercheckedrow:function(event){
+			//role_check_all_row
+			if(event.currentTarget.checked){ // true
+				// 全组
+				if($(event.currentTarget).attr("groupid")=='0'){ // 根节点=0
+					$(".i[groupid='"+$(event.currentTarget).attr("id")+"']").prop("checked",true); // 选中子菜单
+					$(".checkbox_popup_list[groupid='"+$(event.currentTarget).attr("id")+"']").prop("checked",true); // 选中权限
+				}else{
+					// 行选
+					$(".i[id='"+$(event.currentTarget).attr("groupid")+"']").prop("checked",true); // 选中父菜单
+					$(".checkbox_popup_list[columnid='"+$(event.currentTarget).attr("id")+"']").prop("checked",true); // 选中权限
+				}
+			}else{ // false
+				if($(event.currentTarget).attr("superiorid")=='0'){
+					$(".i[groupid='"+$(event.currentTarget).attr("id")+"']").prop("checked",false); // 选中子菜单
+					$(".checkbox_popup_list[groupid='"+$(event.currentTarget).attr("id")+"']").prop("checked",false); // 选中权限
+				}else{
+					// 行选
+					$(".checkbox_popup_list[columnid='"+$(event.currentTarget).attr("id")+"']").prop("checked",false); // 选中权限
+				}
+			}
+		},
+		// 列选
+		powerchecked:function(event,id,superiorid){
+			if(event.currentTarget.checked){
+				$(".i[id='"+$(event.currentTarget).attr("columnid")+"']").prop("checked",true); // 选中行
+				$(".i[id='"+$(event.currentTarget).attr("groupid")+"']").prop("checked",true); // 选中组
+			}
+		},
+		
+	}
+})
+
+function powerbtntest(parameter1,parameter2){
+	vm.isActive=parameter1;
+	vm.parentColor(1);
+	vm.roleid=parameter2;
+	if(parameter1!=0){
+		$.get("/power/assignpower",{roleID:parameter2},function(res){
+			var data = JSON.parse(res)
+			if(data.status=='1000'){
+				vm.showmessage(data.message);
+			}else{
+				vm.reslist=data.list;
+				$(".role_power_body").css({top:"-100%"}).animate({ top: "6%" }, 300);
+			}
+		})
+	}else{
+		vm.showmessage("数据未保存","message_error");
+	}
+	
+}
+</script>
+
+
+</div>
+</body>
+</html>

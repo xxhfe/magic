@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.EmployeeDao">
+<!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+
+	<!-- com.magicloud.controller.EmployeeController：employeelist -->
+    <!-- 员工列表-->
+    <select id="getEmployeeList" parameterType="String" resultType="com.magicloud.entity.Employee">
+        select 
+			e.s_employee_id as employeeId,
+			e.s_employee_name as employeeName,
+			e.s_employee_sex as employeeSex,
+			e.s_employee_phone as employeePhone,
+			e.s_employee_emergency_name as employeeEmergencyName,
+			e.s_employee_emergency_phone as employeeEmergencyPhone,
+			e.s_employee_now_address as employeeNowAddress,
+			e.s_employee_id_address as employeeIDAddress,
+			e.s_employee_id_no as employeeIDNo,
+			e.s_employee_birthday as employeeBirthday,
+			e.s_employee_entry_date as employeeEntryDate,
+			e.s_employee_departure_date as employeeDepartureDate,
+			e.s_org_id as orgId,
+			e.state_id as stateId,
+			e.department_id as departmentId,
+			e.job_id as jobId,
+			e.s_employee_face as employeeface,
+			e.createdate 
+			from employee e ${parameter}
+    </select>
+    <insert id="addEmployee" parameterType="com.magicloud.entity.Employee">
+    insert into employee(
+		s_employee_id,
+		s_employee_name,
+		s_employee_sex,
+		s_employee_phone,
+		s_employee_emergency_name,
+		s_employee_emergency_phone,
+		s_employee_now_address,
+		s_employee_id_address,
+		s_employee_id_no,
+		s_employee_birthday,
+		s_employee_face,
+		s_employee_entry_date,
+		s_employee_departure_date,
+		s_org_id,
+		state_id,
+		department_id,
+		job_id,
+		createdate 
+    )values(
+    #{employeeId},
+    #{employeeName},
+    #{employeeSex},
+    #{employeePhone},
+    #{employeeEmergencyName},
+    #{employeeEmergencyPhone},
+    #{employeeNowAddress},
+    #{employeeIDAddress},
+    #{employeeIDNo},
+    #{employeeBirthday},
+    #{employeeface},
+    #{employeeEntryDate},
+    #{employeeDepartureDate},
+    #{orgId},
+    #{stateId},
+    #{departmentId},
+    #{jobId},
+    now())
+    </insert>
+    <select id="getEmployeeByID" parameterType="String" resultType="com.magicloud.entity.Employee">
+    select 
+	    e.s_employee_id as employeeId,
+		e.s_employee_name as employeeName,
+		e.s_employee_sex as employeeSex,
+		e.s_employee_phone as employeePhone,
+		e.s_employee_emergency_name as employeeEmergencyName,
+		e.s_employee_emergency_phone as employeeEmergencyPhone,
+		e.s_employee_now_address as employeeNowAddress,
+		e.s_employee_id_address as employeeIDAddress,
+		e.s_employee_id_no as employeeIDNo,
+		e.s_employee_birthday as employeeBirthday,
+		e.s_employee_entry_date as employeeEntryDate,
+		e.s_employee_departure_date as employeeDepartureDate,
+		e.s_org_id as orgId,
+		e.state_id as stateId,
+		e.department_id as departmentId,
+		e.job_id as jobId,
+		e.s_employee_face as employeeface,
+		e.createdate 
+    from employee e where e.s_employee_id = #{employeeID}
+    </select>
+    <update id="updateEmployee" parameterType="com.magicloud.entity.Employee">
+    	update employee e set 
+    	e.s_employee_name=#{employeeName},
+		e.s_employee_sex=#{employeeSex},
+		e.s_employee_phone=#{employeePhone},
+		e.s_employee_emergency_name=#{employeeEmergencyName},
+		e.s_employee_emergency_phone=#{employeeEmergencyPhone},
+		e.s_employee_now_address=#{employeeNowAddress},
+		e.s_employee_id_address=#{employeeIDAddress},
+		e.s_employee_id_no=#{employeeIDNo},
+		e.s_employee_birthday=#{employeeBirthday},
+		e.s_employee_face=#{employeeface},
+		e.s_employee_entry_date=#{employeeEntryDate},
+		e.s_employee_departure_date=#{employeeDepartureDate},
+		<if test="stateId!=null">
+			e.state_id=#{stateId},
+		</if>
+		e.department_id=#{departmentId},
+		e.job_id=#{jobId} 
+		where e.s_employee_id = #{employeeId}
+    </update>
+    <update id="updateEmployeeState" parameterType="String">
+    update employee e 
+    set 
+    e.state_id = #{empState} 
+    <if test="empState==99">
+		,e.s_employee_departure_date=now() 
+	</if>
+    where e.s_employee_id = #{empID}
+    </update>
+    <select id="getEmployeeListByJob" parameterType="String" resultType="com.magicloud.entity.Employee">
+    	select 
+			e.s_employee_id as employeeId,
+			e.s_employee_name as employeeName,
+			e.s_employee_sex as employeeSex,
+			e.s_employee_phone as employeePhone,
+			e.s_employee_emergency_name as employeeEmergencyName,
+			e.s_employee_emergency_phone as employeeEmergencyPhone,
+			e.s_employee_now_address as employeeNowAddress,
+			e.s_employee_id_address as employeeIDAddress,
+			e.s_employee_id_no as employeeIDNo,
+			e.s_employee_birthday as employeeBirthday,
+			e.s_employee_entry_date as employeeEntryDate,
+			e.s_employee_departure_date as employeeDepartureDate,
+			e.s_org_id as orgId,
+			e.state_id as stateId,
+			e.department_id as departmentId,
+			e.job_id as jobId,
+			e.s_employee_face as employeeface,
+			e.createdate 
+		from employee e ${parameter}
+    </select>
+    
+</mapper>

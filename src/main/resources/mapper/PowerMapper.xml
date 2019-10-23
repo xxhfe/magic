@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.PowerDao">
+<!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+
+	<!-- com.magicloud.controller：index -->
+    <!-- 登录获取角色权限 -->
+    <select id="getRolePower" parameterType="String" resultType="com.magicloud.entity.Power">
+        select 
+        	p.s_power_id as powerId,
+        	p.s_power_add as powerAdd,
+        	p.s_power_del as powerDel,
+        	p.s_power_upd as powerUpd,
+        	p.s_power_sel as powerSel,
+        	p.s_power_file as powerFile,
+        	p.s_state as state,
+        	p.s_level as level,
+        	p.menu_id as menuId,
+        	p.role_id as roleId,
+        	m.s_superior_id as superNode,
+        	m.s_menu_name as menuName,
+        	m.s_menu_link as menuLink
+			from power p left join menu m on p.menu_id=m.s_menu_id where p.role_id=#{roleID} and p.s_state &lt;&gt; 0 and m.s_state &lt;&gt; 0  ORDER BY m.s_level desc,m.s_sort desc
+    </select>
+    
+    <!-- com.magicloud.controller.business.power:assignpower -->
+    <!-- 获取权限列表 -->
+    <select id="getPowerList" parameterType="String" resultType="com.magicloud.entity.Power">
+    	SELECT 
+			m.s_menu_id as menuId,
+			m.s_superior_id as superNode,
+			m.s_menu_name as menuName,
+			IFNULL(p.s_power_id,'0') as powerId,
+			IFNULL(p.s_power_add,'0') as powerAdd,
+			IFNULL(p.s_power_del,'0') as powerDel,
+			IFNULL(p.s_power_sel,'0') as powerSel,
+			IFNULL(p.s_power_upd,'0') as powerUpd,
+			IFNULL(p.s_power_file,'0') as powerFile,
+			IFNULL(p.s_state,'0') as state  
+		FROM menu m left JOIN power p 
+			on m.s_menu_id = p.menu_id and p.role_id=#{roleID} 
+			where m.s_state &lt;&gt; 0 and m.s_level &gt;= 99 ORDER BY m.s_top_sort desc,m.s_sort desc
+    </select>
+    <!-- com.magicloud.controller.business.power:savepower() -->
+    <insert id="addPower" parameterType="com.magicloud.entity.Power">
+    	insert into 
+    	power(s_power_id,s_power_add,s_power_del,s_power_upd,s_power_sel,s_power_file,s_state,s_level,menu_id,role_id) 
+    	values(#{powerId},#{powerAdd},#{powerDel},#{powerUpd},#{powerSel},#{powerFile},#{state},#{level},#{menuId},#{roleId})
+    </insert>
+    <!-- com.magicloud.controller.business.power:savepower() -->
+    <update id="updatePower" parameterType="com.magicloud.entity.Power">
+    	update power set 
+    	s_power_add = #{powerAdd},
+    	s_power_del = #{powerDel},
+    	s_power_upd = #{powerUpd},
+    	s_power_sel = #{powerSel},
+    	s_power_file = #{powerFile},
+    	s_state = #{state} 
+    	where s_power_id = #{powerId}
+    </update>
+    <!-- com.magicloud.interceptor:preHandle() -->
+    <!-- 获取功能操作权限 -->
+    <select id="getPowerByMenu" parameterType="String" resultType="com.magicloud.entity.Power">
+    select 
+	    p.s_power_id as powerId,
+	    p.s_power_add as powerAdd,
+       	p.s_power_del as powerDel,
+       	p.s_power_upd as powerUpd,
+       	p.s_power_sel as powerSel,
+       	p.s_power_file as powerFile,
+       	p.s_state as state,
+       	p.s_level as level, 
+       	p.menu_id as menuId,
+       	p.role_id as roleId 
+    from power p where p.role_id = #{roleId} and p.menu_id = #{menuId} and s_state = '1'
+    </select>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.magicloud.dao.DepartmentDao">
+    <!-- sql 顶部标注调用该sql的具体方法所在路径 -->
+    
+    <!-- com.magicloud.controller.DepartmentController:departmentlist() -->
+    <!-- com.magicloud.controller.EmployeeController:employeelist() -->
+    <!-- 获取部门列表 -->
+    <select id="getDepartmentList" resultType="com.magicloud.entity.Department" parameterType="com.magicloud.common.Page">
+        select 
+	        s_department_id as departmentId,
+	        s_department_name as departmentName,
+	        s_state as state 
+        from department where s_state &lt;&gt; 0 LIMIT ${(currentPageNo-1)*maxResults} , #{maxResults}
+    </select>
+    <!-- com.magicloud.controller.business.department:addde() -->
+    <!-- 新增部门 -->
+    <insert id="addDepartment" parameterType="com.magicloud.entity.Department">
+    	insert into department(s_department_id,s_department_name,s_state) values(#{departmentId},#{departmentName},'1')
+    </insert>
+    <select id="getAllDepartment" resultType="com.magicloud.entity.Department">
+    	select 
+	        s_department_id as departmentId,
+	        s_department_name as departmentName,
+	        s_state as state 
+        from department where s_state &lt;&gt; 0
+    </select>
+</mapper>
